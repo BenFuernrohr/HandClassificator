@@ -8,6 +8,10 @@ import classification.Classification_Result;
 import dempster.DempsterHandler;
 import dempster.Measure;
 
+/**
+ * Class to handle the evaluation of classificator-results using the Dempster-Shafer-method
+ * @author Ben Fürnrohr
+ */
 public class DempsterEvaluator {
 	
 	/** Lists representing all possible classifications */
@@ -19,61 +23,67 @@ public class DempsterEvaluator {
 	/** Array of string representing the single results */
 	private static final String[] RESULT_NAMES = {"Beginner", "Advanced", "Expert"};
 
-	public void evaluateClassification(DempsterHandler dempsterHandler, Classification_Result zAxis,
+	/**
+	 * Evaluates classification-result and prints the result in form of beliefs, plausabilitys and doubts for each case
+	 * @param zAxis result of the z-axis-variation-classification
+	 * @param movCor result of the movement-correction-classification
+	 * @param multThumb result of the multiple-rapid-thumb-spreads-classification
+	 * @param handSpread result of the handspread-count-Classification
+	 */
+	public void evaluateClassification(Classification_Result zAxis,
 			Classification_Result movCor, Classification_Result multThumb, Classification_Result handSpread) {
-		//Show results
-		System.out.println("zAxis-Variation: " + zAxis);
-		System.out.println("handSpread-Count: " + handSpread);
-		System.out.println("doubleThumbSpread-Count: " + multThumb);
-		System.out.println("movementCorrection-Count: " + movCor + "\n");
+		DempsterHandler dempsterHandler = new DempsterHandler(3);
 		
 		// z-Axis
 		Measure zAxisMeasure = dempsterHandler.addMeasure();
-		if (zAxis.equals(Classification_Result.LOW)) {
-			zAxisMeasure.addEntry(EXPERT_OR_ADVANCED_LIST, 0.7);
-		} else if (zAxis.equals(Classification_Result.MEDIUM)) {
-			zAxisMeasure.addEntry(BEGINNER_OR_ADVANCED_LIST, 0.7);
-		} else if (zAxis.equals(Classification_Result.HIGH)) {
-			zAxisMeasure.addEntry(BEGINNER_LIST, 0.7);
+		switch (zAxis) {
+			case LOW: zAxisMeasure.addEntry(EXPERT_OR_ADVANCED_LIST, 0.7); break;
+			case MEDIUM: zAxisMeasure.addEntry(BEGINNER_OR_ADVANCED_LIST, 0.7); break;
+			case HIGH: zAxisMeasure.addEntry(BEGINNER_LIST, 0.7); break;
 		}
 
 		// handSpread
 		Measure handSpreadMeasure = dempsterHandler.addMeasure();
-		if (handSpread.equals(Classification_Result.LOW)) {
-			handSpreadMeasure.addEntry(EXPERT_OR_ADVANCED_LIST, 0.7);
-		} else if (handSpread.equals(Classification_Result.MEDIUM)) {
-			handSpreadMeasure.addEntry(COULD_BE_ANYTHING_LIST, 0.7);
-		} else if (handSpread.equals(Classification_Result.HIGH)) {
-			handSpreadMeasure.addEntry(BEGINNER_LIST, 0.7);
+		switch (handSpread) {
+			case LOW: handSpreadMeasure.addEntry(EXPERT_OR_ADVANCED_LIST, 0.7); break;
+			case MEDIUM: handSpreadMeasure.addEntry(COULD_BE_ANYTHING_LIST, 0.7); break;
+			case HIGH: handSpreadMeasure.addEntry(BEGINNER_LIST, 0.7); break;
 		}
 
 		// movementCorrection
 		Measure movementCorrectionMeasure = dempsterHandler.addMeasure();
-		if (movCor.equals(Classification_Result.LOW)) {
-			movementCorrectionMeasure.addEntry(EXPERT_OR_ADVANCED_LIST, 0.7);
-		} else if (movCor.equals(Classification_Result.MEDIUM)) {
-			movementCorrectionMeasure.addEntry(BEGINNER_OR_ADVANCED_LIST, 0.7);
-		} else if (movCor.equals(Classification_Result.HIGH)) {
-			movementCorrectionMeasure.addEntry(BEGINNER_LIST, 0.7);
+		switch (movCor) {
+			case LOW: movementCorrectionMeasure.addEntry(EXPERT_OR_ADVANCED_LIST, 0.7); break;
+			case MEDIUM: movementCorrectionMeasure.addEntry(BEGINNER_OR_ADVANCED_LIST, 0.7); break;
+			case HIGH: movementCorrectionMeasure.addEntry(BEGINNER_LIST, 0.7); break;
 		}
 
 		// doubleThumbSpread
 		Measure doubleThumbSpreadMeasure = dempsterHandler.addMeasure();
-		if (multThumb.equals(Classification_Result.LOW)) {
-			doubleThumbSpreadMeasure.addEntry(EXPERT_OR_ADVANCED_LIST, 0.7);
-		} else if (multThumb.equals(Classification_Result.MEDIUM)) {
-			doubleThumbSpreadMeasure.addEntry(BEGINNER_OR_ADVANCED_LIST, 0.7);
-		} else if (multThumb.equals(Classification_Result.HIGH)) {
-			doubleThumbSpreadMeasure.addEntry(BEGINNER_LIST, 0.7);
+		switch (multThumb) {
+			case LOW: doubleThumbSpreadMeasure.addEntry(EXPERT_OR_ADVANCED_LIST, 0.7); break;
+			case MEDIUM: doubleThumbSpreadMeasure.addEntry(BEGINNER_OR_ADVANCED_LIST, 0.7); break;
+			case HIGH: doubleThumbSpreadMeasure.addEntry(BEGINNER_LIST, 0.7); break;
 		}
-		
+				
 		dempsterHandler.accumulateAllMeasures();
+		this.interpretMeasure(dempsterHandler.getFirstMeasure());
 	}
 
-	public void interpretMeasure(Measure measure) {
+	/**
+	 * Interprets the {@link Measure} that is the result of the dempster-evaluation and prints the result
+	 * @param measure the measure to be interpreted
+	 */
+	private void interpretMeasure(Measure measure) {
+		System.out.println("Results of Dempster-Shafer-Evaluation: \n");
+		
+		//find the result with the highest belief
 		int withHighestBelief = 0;
 		double highestBelief = 0;
+		
 		DecimalFormat df = new DecimalFormat("#.##");
+		
+		//print all the results
 		for (int i = 0; i < 3; i++) {
 			double belief = measure.calculateBelief(i);
 			double doubt = measure.calculateDoubt(i);
@@ -82,10 +92,12 @@ public class DempsterEvaluator {
 				highestBelief = belief;
 				withHighestBelief = i;
 			}
-			String entryString = "Results for " + DempsterEvaluator.RESULT_NAMES[i] + ":\nPlausability: \t" + df.format(plausability) + "\nBelief:  \t" + df.format(belief) + "\nDoubt:  \t" + df.format(doubt) + "\n";
+			String entryString = "Results for " + DempsterEvaluator.RESULT_NAMES[i] + ":\nPlausability: \t" + df.format(plausability) + "\tBelief:  \t" + df.format(belief) + "\tDoubt:  \t" + df.format(doubt) + "\n";
 			System.out.println(entryString);
 		}
-		String finalResultString = "Final evaluation: You are " + DempsterEvaluator.RESULT_NAMES[withHighestBelief] + " with a propability (belief) of " + df.format(highestBelief);
+		
+		//print the final verdict
+		String finalResultString = "Final verdict: You are " + DempsterEvaluator.RESULT_NAMES[withHighestBelief] + " with a probability (belief) of " + df.format(highestBelief);
 		System.out.println(finalResultString +"\n\n");
 	}
 	

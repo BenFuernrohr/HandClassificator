@@ -6,23 +6,34 @@ import classification.Classification_Result;
 import norsys.netica.Environ;
 import norsys.netica.Net;
 import norsys.netica.NeticaException;
+import norsys.netica.Streamer;
 import norsys.neticaEx.aliases.Node;
 
-public class NeticaEvaluator{
+/**
+ * Class to handle the evaluation of classificator-results using a Bayes-net provided by the Netica-framework
+ * @author Ben Fürnrohr
+ */
+public class BayesEvaluator{
 	
+	/** The bayes-network */
 	private Net net;
-	
+
+	/** Nodes representing results of the classification */
 	private Node  zAxisVariation;
 	private Node  movementCorrection;
 	private Node  multipleThumbSpreads;
 	private Node  handSpreads;
+	
+	/** Node representing the skill-level of the player */
 	private Node  skillLevel;
 	
 	/** Array of string representing the single results */
 	private static final String[] RESULT_NAMES = {"Beginner", "Advanced", "Expert"};
 	
-	public NeticaEvaluator() {
+	
+	public BayesEvaluator() {
 		
+		//initialize the net
 		try {
 			Node.setConstructorClass ("norsys.neticaEx.aliases.Node"); 
 			new Environ (null);
@@ -56,6 +67,13 @@ public class NeticaEvaluator{
 		}
 	}
 
+	/**
+	 * Evaluates classification-result and prints the result in form of a belief 
+	 * @param zAxis result of the z-axis-variation-classification
+	 * @param movCor result of the movement-correction-classification
+	 * @param multThumb result of the multiple-rapid-thumb-spreads-classification
+	 * @param handSpread result of the handspread-count-Classification
+	 */
 	public void evaluateClassification(Classification_Result zAxis,
 			Classification_Result movCor, Classification_Result multThumb, Classification_Result handSpread) {
 		try {
@@ -68,20 +86,27 @@ public class NeticaEvaluator{
 			multipleThumbSpreads.finding().enterState(translateClassificationResult(multThumb));
 			handSpreads.finding().enterState(translateClassificationResult(handSpread));
 			
+			System.out.println("Results of Bayes-Net-Evaluation: \n");
 			int withHighestBelief = 0;
 			double highestBelief = 0;
 			DecimalFormat df = new DecimalFormat("#.##");
 			for (int i = 0; i < 3; i++) {
-				double belief = skillLevel.getBelief(NeticaEvaluator.RESULT_NAMES[i]);
+				double belief = skillLevel.getBelief(BayesEvaluator.RESULT_NAMES[i]);
 				if (belief > highestBelief) {
 					highestBelief = belief;
 					withHighestBelief = i;
 				}
-				String entryString = "nBelief for " + NeticaEvaluator.RESULT_NAMES[i] +  ": \t" + df.format(belief) ;
+				String entryString = "Belief for " + BayesEvaluator.RESULT_NAMES[i] +  ": \t" + df.format(belief) ;
 				System.out.println(entryString);
 			}
-			String finalResultString = "Final evaluation: You are " + NeticaEvaluator.RESULT_NAMES[withHighestBelief] + " with a propability (belief) of " + df.format(highestBelief);
-			System.out.println(finalResultString +"\n\n");
+			String finalResultString = "Final verdict: You are " + BayesEvaluator.RESULT_NAMES[withHighestBelief] + " with a probability (belief) of " + df.format(highestBelief);
+			System.out.println(finalResultString +"\n");
+			
+			//write the net to .dne-file 
+			Streamer stream = new Streamer("Bayes-Net"+System.currentTimeMillis()+ BayesEvaluator.RESULT_NAMES[withHighestBelief]+ df.format(highestBelief) +".dne"); 
+			this.net.write(stream);
+			
+			System.out.println("The Bayes-Net has been written to Bayes-Net.dne\n");
 		}
 		catch(NeticaException e) {
 			e.printStackTrace();
@@ -176,12 +201,17 @@ public class NeticaEvaluator{
 	/*l  l   l    m */			0.08F, 0.45F, 0.47F, 
 	/*l  l   l    l */			0.05F, 0.35F, 0.60F,   };
 
+	/**
+	 * Transfers a value from a classification-result to a representing string
+	 * @param classificationResult the classification-result
+	 * @return a String representing the classification-result
+	 */
 	private String translateClassificationResult(Classification_Result classificationResult) {
 		switch (classificationResult) {
 			case LOW: return "low";
 			case MEDIUM: return "medium";
 			case HIGH: return "high";
+			default: return "low";
 		}
-		return null;
 	}
 }

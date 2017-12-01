@@ -1,5 +1,6 @@
 package main;
 
+import java.util.Arrays;
 import java.util.List;
 
 import classification.Classification_Result;
@@ -9,13 +10,19 @@ import classification.MovementCorrection_Classificator;
 import classification.MultipleThumbSpread_Classificator;
 import classification.ZAxisVariation_Classificator;
 import dempster.DempsterHandler;
+import dempster.Measure;
 import evaluation.DempsterEvaluator;
-import evaluation.NeticaEvaluator;
+import evaluation.BayesEvaluator;
 import inputreader.CalibrationDataset;
 import inputreader.CsvDataReader;
 import inputreader.HandData;
 import inputreader.RawDataHandler;
 
+/**
+ * Main Class of the Hand-Movement-Classificator as used in WB-IT15D (DHBW)
+ * Contains the Main-Class that reads from the 3 csv-files and starts classification and evaluation of the movement
+ * @author Ben Fürnrohr
+ */
 public class MainClass{
 	
 	/** Datareader for csv-Files */
@@ -35,8 +42,12 @@ public class MainClass{
 	private Classifyable movementCorrection;
 	private Classifyable multipleThumbSpread;
 	private Classifyable zAxisVariation;
+		
+	/** Dempster-Evaluator */
+	private DempsterEvaluator dempsterEvaluator = new DempsterEvaluator();	;	
 	
-	
+	/** Netica-Evaluator */
+	private BayesEvaluator bayesEvaluator = new BayesEvaluator();;
 	
 	public static void main(String args[]) {		
 		
@@ -44,43 +55,47 @@ public class MainClass{
 		mainClass.createCalibrationDataset();
 		mainClass.extractSessionData();	
 		mainClass.initializeClassificators();
-		DempsterEvaluator dempsterEvaluator = new DempsterEvaluator();	
-		NeticaEvaluator neticaEvaluator = new NeticaEvaluator();
 				
 		//evaluate first Session
 		System.out.println("Evaluating first Session:");
-		mainClass.setSessionDataForClassificators(mainClass.firstSessionData);
-		
-		Classification_Result handSpreadClassification = mainClass.handSpreadCount.classify();
-		Classification_Result movementCorrectionClassification = mainClass.movementCorrection.classify();
-		Classification_Result multipleThumbSpreadClassification = mainClass.multipleThumbSpread.classify();
-		Classification_Result zAxisVariationClassification = mainClass.zAxisVariation.classify();
-					
-		DempsterHandler dempsterHandler1 = new DempsterHandler(3);
-		
-		dempsterEvaluator.evaluateClassification(dempsterHandler1, zAxisVariationClassification, movementCorrectionClassification, multipleThumbSpreadClassification, handSpreadClassification);
-		dempsterEvaluator.interpretMeasure(dempsterHandler1.getFirstMeasure());
-		
-		neticaEvaluator.evaluateClassification(zAxisVariationClassification, movementCorrectionClassification, multipleThumbSpreadClassification, handSpreadClassification);
-		
-		
+		mainClass.evaluateSession(mainClass.firstSessionData);
 		
 		//evaluate second Session
 		System.out.println("Evaluating second Session:");
-		mainClass.setSessionDataForClassificators(mainClass.secondSessionData);
-		Classification_Result handSpreadClassification2 = mainClass.handSpreadCount.classify();
-		Classification_Result movementCorrectionClassification2 = mainClass.movementCorrection.classify();
-		Classification_Result multipleThumbSpreadClassification2 = mainClass.multipleThumbSpread.classify();
-		Classification_Result zAxisVariationClassification2 = mainClass.zAxisVariation.classify();
-		
-		DempsterHandler dempsterHandler2 = new DempsterHandler(3);
-		
-		dempsterEvaluator.evaluateClassification(dempsterHandler2, zAxisVariationClassification2, movementCorrectionClassification2, multipleThumbSpreadClassification2, handSpreadClassification2);
-		dempsterEvaluator.interpretMeasure(dempsterHandler2.getFirstMeasure());
-		
-		neticaEvaluator.evaluateClassification(zAxisVariationClassification2, movementCorrectionClassification2, multipleThumbSpreadClassification2, handSpreadClassification2);
+		mainClass.evaluateSession(mainClass.secondSessionData);	
 	}
 	
+	/**
+	 * Evaluate a session using the extracted session-Data
+	 * @param sessionData the data of the session to be evaluated 
+	 */
+	private void evaluateSession(List<HandData> sessionData) {
+
+		//set the session data for the classificators
+		this.handSpreadCount.setSessionData(sessionData);
+		this.movementCorrection.setSessionData(sessionData);
+		this.multipleThumbSpread.setSessionData(sessionData);
+		this.zAxisVariation.setSessionData(sessionData);
+		
+		Classification_Result handSpreadClassification = this.handSpreadCount.classify();
+		Classification_Result movementCorrectionClassification = this.movementCorrection.classify();
+		Classification_Result multipleThumbSpreadClassification = this.multipleThumbSpread.classify();
+		Classification_Result zAxisVariationClassification = this.zAxisVariation.classify();		
+		
+		//Show results
+		System.out.println("Classificator-Results: \n");
+		System.out.println("zAxis-Variation: \t\t" + zAxisVariationClassification);
+		System.out.println("handSpread-Count:  \t\t" + handSpreadClassification);
+		System.out.println("doubleThumbSpread-Count: \t" + multipleThumbSpreadClassification);
+		System.out.println("movementCorrection-Count: \t" + movementCorrectionClassification + "\n");
+
+		dempsterEvaluator.evaluateClassification(zAxisVariationClassification, movementCorrectionClassification, multipleThumbSpreadClassification, handSpreadClassification);
+		bayesEvaluator.evaluateClassification(zAxisVariationClassification, movementCorrectionClassification, multipleThumbSpreadClassification, handSpreadClassification);
+	}
+
+	/**
+	 * Initialize the classificators with the calibration-dataset
+	 */
 	private void initializeClassificators() {
 		handSpreadCount = new HandSpreadCount_Classificator(calibrationDataSet);
 		movementCorrection = new MovementCorrection_Classificator(calibrationDataSet);
@@ -88,33 +103,23 @@ public class MainClass{
 		zAxisVariation = new ZAxisVariation_Classificator(calibrationDataSet);
 		
 	}
-
-	private void setSessionDataForClassificators(List<HandData> sessionData) {
-		handSpreadCount.setSessionData(sessionData);
-		movementCorrection.setSessionData(sessionData);
-		multipleThumbSpread.setSessionData(sessionData);
-		zAxisVariation.setSessionData(sessionData);
-		
-	}
-
+	
+	/**
+	 * Extract the data from the csv-file used for calibration
+	 */
 	private void createCalibrationDataset() {
 		List<HandData> extractedData = csvDataReader.parseIntoDataObject("/CSV_Data/sample_0_Statistics.csv");
 
 		RawDataHandler rawDataHandler = new RawDataHandler();
 		rawDataHandler.setDataFromCompleteRun(extractedData);
-		
-		double thumbSpreadAvg = rawDataHandler.thumbSpreadAvg();
-		double handSpreadAvg = rawDataHandler.handSpreadAvg();
-		double thumbRestAvg = rawDataHandler.thumbRestAvg();
-		double handRestAvg = rawDataHandler.handRestAvg();
-		
-		this.calibrationDataSet = new CalibrationDataset(thumbRestAvg, handRestAvg, thumbSpreadAvg, handSpreadAvg);		
+		this.calibrationDataSet = rawDataHandler.generateCalibrationDataset();
 	}
 	
+	/**
+	 * Extract the SessionData from the csv-Files
+	 */
 	private void extractSessionData() {
 		this.firstSessionData = csvDataReader.parseIntoDataObject("/CSV_Data/session_1_Statistics.csv");
 		this.secondSessionData = csvDataReader.parseIntoDataObject("/CSV_Data/session_2_Statistics.csv");		
-	}
-	
-		
+	}	
 }

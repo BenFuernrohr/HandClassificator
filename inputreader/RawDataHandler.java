@@ -8,11 +8,7 @@ public class RawDataHandler{
 	private List<HandData> dataFromCompleteRun;
 	private List<Double> thumbSpreadData;
 	private List<Double> handSpreadData;
-	
-	public RawDataHandler() {
 		
-	}
-	
 	public void setDataFromCompleteRun(List<HandData> data) {
 		this.dataFromCompleteRun = data;
 		List<Double> thumbDataList = new ArrayList<Double>();
@@ -28,21 +24,21 @@ public class RawDataHandler{
 		this.handSpreadData = handDataList;
 	}
 	
-	public double thumbSpreadAvg() {		
+	public double calculateThumbSpreadAvg() {		
 		double[] maxima = this.find3Maxima(this.thumbSpreadData);
 		return (maxima[0]+maxima[1]+maxima[2])/3;		
 	}
 	
-	public double handSpreadAvg() {		
+	public double calculateHandSpreadAvg() {		
 		double[] maxima = this.find3Maxima(this.handSpreadData);
 		return (maxima[0]+maxima[1]+maxima[2])/3;
 	}
 	
-	public double thumbRestAvg() {
+	public double calculateThumbRestAvg() {
 		return this.avgFromData(this.thumbSpreadData);
 	}
 	
-	public double handRestAvg() {
+	public double calculateHandRestAvg() {
 		return this.avgFromData(this.handSpreadData);
 	}
 	
@@ -92,6 +88,10 @@ public class RawDataHandler{
 		}
 		double[] retArray = {highest, second, third};		
 		return retArray;
+	}
+
+	public CalibrationDataset generateCalibrationDataset() {
+		return new CalibrationDataset(this.calculateThumbRestAvg(), this.calculateHandRestAvg(), this.calculateThumbSpreadAvg(), this.calculateHandSpreadAvg());		
 	}
 	
 }
