@@ -1,6 +1,5 @@
 package main;
 
-import java.util.Arrays;
 import java.util.List;
 
 import classification.Classification_Result;
@@ -9,8 +8,6 @@ import classification.HandSpreadCount_Classificator;
 import classification.MovementCorrection_Classificator;
 import classification.MultipleThumbSpread_Classificator;
 import classification.ZAxisVariation_Classificator;
-import dempster.DempsterHandler;
-import dempster.Measure;
 import evaluation.DempsterEvaluator;
 import evaluation.BayesEvaluator;
 import inputreader.CalibrationDataset;
