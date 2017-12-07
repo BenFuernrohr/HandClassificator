@@ -2,7 +2,7 @@ package evaluation;
 
 import java.text.DecimalFormat;
 
-import classification.Classification_Result;
+import classification.ClassificationResult;
 import norsys.netica.Environ;
 import norsys.netica.Net;
 import norsys.netica.NeticaException;
@@ -74,8 +74,8 @@ public class BayesEvaluator{
 	 * @param multThumb result of the multiple-rapid-thumb-spreads-classification
 	 * @param handSpread result of the handspread-count-Classification
 	 */
-	public void evaluateClassification(Classification_Result zAxis,
-			Classification_Result movCor, Classification_Result multThumb, Classification_Result handSpread) {
+	public void evaluateClassification(ClassificationResult zAxis,
+			ClassificationResult movCor, ClassificationResult multThumb, ClassificationResult handSpread) {
 		try {
 			//retract findings if there are any
 			this.net.retractFindings();
@@ -206,7 +206,7 @@ public class BayesEvaluator{
 	 * @param classificationResult the classification-result
 	 * @return a String representing the classification-result
 	 */
-	private String translateClassificationResult(Classification_Result classificationResult) {
+	private String translateClassificationResult(ClassificationResult classificationResult) {
 		switch (classificationResult) {
 			case LOW: return "low";
 			case MEDIUM: return "medium";

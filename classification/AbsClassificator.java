@@ -5,13 +5,19 @@ import java.util.List;
 import inputreader.CalibrationDataset;
 import inputreader.HandData;
 
-public abstract class Abs_Classificator implements Classifyable{
+/**
+ * Abstract class from which all classificators shall be derived
+ * @author Ben Fürnrohr
+ */
+public abstract class AbsClassificator implements ClassifyableIF{
 	
+	/** Dataset from calibration, must be set at least once */
 	protected CalibrationDataset calibrationDataset;
 	
+	/** Data of the session in evaluation */
 	protected List<HandData> sessionData;
 	
-	public Abs_Classificator(CalibrationDataset calibrationDataset) {
+	public AbsClassificator(CalibrationDataset calibrationDataset) {
 		this.calibrationDataset = calibrationDataset;
 	}
 

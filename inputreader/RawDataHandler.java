@@ -100,9 +100,13 @@ public class RawDataHandler{
 	 * @return array of 3 highest points (highest, second, third)
 	 */
 	private double[] find3Maxima(List<Double> dataList) {
+		
+		//maxima in order
 		double highest = 0;
 		double second = 0;
 		double third = 0;
+		
+		//curent datapoint
 		double current = 0.0;
 		boolean rising = true;
 		

@@ -4,7 +4,7 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
 
-import classification.Classification_Result;
+import classification.ClassificationResult;
 import dempster.DempsterHandler;
 import dempster.Measure;
 
@@ -30,8 +30,8 @@ public class DempsterEvaluator {
 	 * @param multThumb result of the multiple-rapid-thumb-spreads-classification
 	 * @param handSpread result of the handspread-count-Classification
 	 */
-	public void evaluateClassification(Classification_Result zAxis,
-			Classification_Result movCor, Classification_Result multThumb, Classification_Result handSpread) {
+	public void evaluateClassification(ClassificationResult zAxis,
+			ClassificationResult movCor, ClassificationResult multThumb, ClassificationResult handSpread) {
 		DempsterHandler dempsterHandler = new DempsterHandler(3);
 		
 		// z-Axis

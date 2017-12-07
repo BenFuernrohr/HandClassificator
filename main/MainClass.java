@@ -2,12 +2,12 @@ package main;
 
 import java.util.List;
 
-import classification.Classification_Result;
-import classification.Classifyable;
-import classification.HandSpreadCount_Classificator;
-import classification.MovementCorrection_Classificator;
-import classification.MultipleThumbSpread_Classificator;
-import classification.ZAxisVariation_Classificator;
+import classification.ClassificationResult;
+import classification.ClassifyableIF;
+import classification.HandSpreadCountClassificator;
+import classification.MovementCorrectionClassificator;
+import classification.MultipleThumbSpreadClassificator;
+import classification.ZAxisVariationClassificator;
 import evaluation.DempsterEvaluator;
 import evaluation.BayesEvaluator;
 import inputreader.CalibrationDataset;
@@ -35,10 +35,10 @@ public class MainClass{
 	private List<HandData> secondSessionData;
 	
 	/** Classificators */
-	private Classifyable handSpreadCount;
-	private Classifyable movementCorrection;
-	private Classifyable multipleThumbSpread;
-	private Classifyable zAxisVariation;
+	private ClassifyableIF handSpreadCount;
+	private ClassifyableIF movementCorrection;
+	private ClassifyableIF multipleThumbSpread;
+	private ClassifyableIF zAxisVariation;
 		
 	/** Dempster-Evaluator */
 	private DempsterEvaluator dempsterEvaluator = new DempsterEvaluator();	;	
@@ -74,10 +74,10 @@ public class MainClass{
 		this.multipleThumbSpread.setSessionData(sessionData);
 		this.zAxisVariation.setSessionData(sessionData);
 		
-		Classification_Result handSpreadClassification = this.handSpreadCount.classify();
-		Classification_Result movementCorrectionClassification = this.movementCorrection.classify();
-		Classification_Result multipleThumbSpreadClassification = this.multipleThumbSpread.classify();
-		Classification_Result zAxisVariationClassification = this.zAxisVariation.classify();		
+		ClassificationResult handSpreadClassification = this.handSpreadCount.classify();
+		ClassificationResult movementCorrectionClassification = this.movementCorrection.classify();
+		ClassificationResult multipleThumbSpreadClassification = this.multipleThumbSpread.classify();
+		ClassificationResult zAxisVariationClassification = this.zAxisVariation.classify();		
 		
 		//Show results
 		System.out.println("Classificator-Results: \n");
@@ -94,10 +94,10 @@ public class MainClass{
 	 * Initialize the classificators with the calibration-dataset
 	 */
 	private void initializeClassificators() {
-		handSpreadCount = new HandSpreadCount_Classificator(calibrationDataSet);
-		movementCorrection = new MovementCorrection_Classificator(calibrationDataSet);
-		multipleThumbSpread = new MultipleThumbSpread_Classificator(calibrationDataSet);
-		zAxisVariation = new ZAxisVariation_Classificator(calibrationDataSet);
+		handSpreadCount = new HandSpreadCountClassificator(calibrationDataSet);
+		movementCorrection = new MovementCorrectionClassificator(calibrationDataSet);
+		multipleThumbSpread = new MultipleThumbSpreadClassificator(calibrationDataSet);
+		zAxisVariation = new ZAxisVariationClassificator(calibrationDataSet);
 		
 	}
 	
