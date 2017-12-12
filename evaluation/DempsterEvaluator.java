@@ -53,9 +53,9 @@ public class DempsterEvaluator {
 		// movementCorrection
 		Measure movementCorrectionMeasure = dempsterHandler.addMeasure();
 		switch (movCor) {
-			case LOW: movementCorrectionMeasure.addEntry(EXPERT_OR_ADVANCED_LIST, 0.7); break;
-			case MEDIUM: movementCorrectionMeasure.addEntry(BEGINNER_OR_ADVANCED_LIST, 0.7); break;
-			case HIGH: movementCorrectionMeasure.addEntry(BEGINNER_LIST, 0.7); break;
+			case LOW: movementCorrectionMeasure.addEntry(EXPERT_OR_ADVANCED_LIST, 0.5); break;
+			case MEDIUM: movementCorrectionMeasure.addEntry(BEGINNER_OR_ADVANCED_LIST, 0.5); break;
+			case HIGH: movementCorrectionMeasure.addEntry(BEGINNER_LIST, 0.5	); break;
 		}
 
 		// doubleThumbSpread
