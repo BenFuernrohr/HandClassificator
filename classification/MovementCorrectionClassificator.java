@@ -17,16 +17,19 @@ import inputreader.HandData;
 public class MovementCorrectionClassificator extends AbsClassificator{
 
 	/** Threshold of relation between average and standard deviation until which result will be considered {@link ClassificationResult.LOW} */
-	private static final int lowThreshold = 15;
+	private static final int lowThreshold = 50;
 	
 	/** Threshold of relation between average and standard deviation until which result will be considered {@link ClassificationResult.MEDIUM} */
-	private static final int mediumThreshold = 30;
+	private static final int mediumThreshold = 100;
 	
 	/** Smooth-anmount */
-	private static final int smoothWidth = 5;
+	private static final int smoothWidth = 10;
 	
 	/** Time-frame to accord for a "correction" instead for just a new movement */
 	private static final int correctionWidth = 10;
+	
+	/** Enum allowing to distinguish between movement in X or Y - Direction  */
+	private enum Direction {X,Y}
 	
 	public MovementCorrectionClassificator(CalibrationDataset calibrationDataset) {
 		super(calibrationDataset);
@@ -34,12 +37,34 @@ public class MovementCorrectionClassificator extends AbsClassificator{
 
 	@Override
 	public ClassificationResult classify() {
+		int totalMovements = this.countMovementCorrections(Direction.X) + this.countMovementCorrections(Direction.Y);
+		
+		if (totalMovements < MovementCorrectionClassificator.lowThreshold) {
+			return ClassificationResult.LOW;
+		}
+		else if (totalMovements < MovementCorrectionClassificator.mediumThreshold) {
+			return ClassificationResult.MEDIUM;
+		}
+		else {
+			return ClassificationResult.HIGH;
+		}		
+	}	
+	
+	/**
+	 * Counts the number of correction over the time in the movement in a certain direction
+	 * @param direction {@link Direction} of the movement to be analyzed (X or Y)
+	 * @return number of movement-corrections in this direction
+	 */
+	private int countMovementCorrections(Direction direction) {
 		//get the position-data and smooth it
 		List<Double> posList = new ArrayList<Double>();
 		for (HandData hd : sessionData) {
-			posList.add(hd.getPalm_Position_X());
+			switch (direction) {
+				case X: posList.add(hd.getPalm_Position_X()); break;
+				case Y: posList.add(hd.getPalm_Position_Y()); break;
+			}			
 		}
-		posList = this.applySmooth(posList, MovementCorrectionClassificator.smoothWidth);
+		posList = this.applySmooth(posList);
 		
 		//find local minima and local maxima
 		//initialize rising from first 2 values;
@@ -75,24 +100,16 @@ public class MovementCorrectionClassificator extends AbsClassificator{
 			}
 			buffer = currentExtremum;
 		}
-		if (movementCorrectionCounter < MovementCorrectionClassificator.lowThreshold) {
-			return ClassificationResult.LOW;
-		}
-		else if (movementCorrectionCounter < MovementCorrectionClassificator.mediumThreshold) {
-			return ClassificationResult.MEDIUM;
-		}
-		else {
-			return ClassificationResult.HIGH;
-		}		
-	}	
+		return movementCorrectionCounter;
+	}
 	
 	/**
-	 * Smooths a list of doubles by removing small variations that might be because of errors in measuring
+	 * Smooths a list of doubles by removing small variations
 	 * @param valueArray the array to be smoothed
 	 * @param smoothWidth the width to smooth by
 	 * @return ArrayList<Double> the smoothed array
 	 */
-	private ArrayList<Double> applySmooth(List<Double> valueArray, int smoothWidth) {
+	private ArrayList<Double> applySmooth(List<Double> valueArray) {
 
 		ArrayList<Double> smoothedArray = new ArrayList<>();
 		for (int i = 0; i < smoothWidth; i++) {

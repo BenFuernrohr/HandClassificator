@@ -103,10 +103,11 @@ public class BayesEvaluator{
 			System.out.println(finalResultString +"\n");
 			
 			//write the net to .dne-file 
-			Streamer stream = new Streamer("Bayes-Net"+System.currentTimeMillis()+ BayesEvaluator.RESULT_NAMES[withHighestBelief]+ df.format(highestBelief) +".dne"); 
+			String fileName = "BayesResults/Bayes-Net"+System.currentTimeMillis()+ BayesEvaluator.RESULT_NAMES[withHighestBelief]+ df.format(highestBelief) +".dne";
+			Streamer stream = new Streamer(fileName); 
 			this.net.write(stream);
 			
-			System.out.println("The Bayes-Net has been written to Bayes-Net.dne\n");
+			System.out.println("The Bayes-Net has been written to " + fileName + "\n");
 		}
 		catch(NeticaException e) {
 			e.printStackTrace();

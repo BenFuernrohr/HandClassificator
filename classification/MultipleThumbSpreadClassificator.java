@@ -17,6 +17,12 @@ public class MultipleThumbSpreadClassificator extends AbsClassificator{
 	/** Threshold of relation between average and standard deviation until which result will be considered {@link ClassificationResult.MEDIUM} */
 	private static final int mediumThreshold = 6;
 
+	/** Since spreads in the actual game are usually not as high as in the calibration, the calibrated threshold will be reduced by this multiplicator*/
+	private static final double measurementCorrection = 0.7;
+	
+	/** Interval between spreads up to which it is considered a "double-Spread" */
+	private static final int doubleSpreadInterval = 50;
+
 	public MultipleThumbSpreadClassificator(CalibrationDataset calibrationDataset) {
 		super(calibrationDataset);
 	}
@@ -32,7 +38,7 @@ public class MultipleThumbSpreadClassificator extends AbsClassificator{
 		for (HandData hd: sessionData) {
 			//hit calibrated spread-level? 
 			//Correct avg to 50%, because the calibration means a very high spread but in sessions spreads are not that big
-			if (hd.getThumb() > this.calibrationDataset.getAvgThumbSpread()/2) 
+			if (hd.getThumb() > this.calibrationDataset.getAvgThumbSpread()*MultipleThumbSpreadClassificator.measurementCorrection ) 
 			{
 				if (thumbIsRelaxed) {
 					//it's a spread
@@ -51,9 +57,9 @@ public class MultipleThumbSpreadClassificator extends AbsClassificator{
 					thumbIsRelaxed = true;
 				}
 				else if (thumbIsRelaxed) {
-					//count the duration of relaxed Hand. Reset recentlySpread if hand is relaxed for long enough
+					//count the duration of relaxed h0and. Reset recentlySpread if hand is relaxed for long enough
 					counter++;
-					if (counter >50)
+					if (counter > MultipleThumbSpreadClassificator.doubleSpreadInterval)
 						thumbWasRecentlySpread = false;
 				}
 			}

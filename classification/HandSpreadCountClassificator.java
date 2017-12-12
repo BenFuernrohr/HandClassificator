@@ -17,6 +17,9 @@ public class HandSpreadCountClassificator extends AbsClassificator{
 	/** Threshold of relation between average and standard deviation until which result will be considered {@link ClassificationResult.MEDIUM} */
 	private static final int mediumThreshold = 6;
 	
+	/** Since spreads in the actual game are usually not as high as in the calibration, the calibrated threshold will be reduced by this multiplicator*/
+	private static final double measurementCorrection = 0.9;
+	
 	public HandSpreadCountClassificator(CalibrationDataset calibrationDataset) {
 		super(calibrationDataset);
 	}
@@ -28,7 +31,7 @@ public class HandSpreadCountClassificator extends AbsClassificator{
 		int handSpreadCount = 0;
 		for (HandData hd: sessionData) {
 			//hit calibrated spread-level?
-			if (hd.getSpread() > this.calibrationDataset.getAvgHandSpread()) {
+			if (hd.getSpread() > this.calibrationDataset.getAvgHandSpread()*HandSpreadCountClassificator.measurementCorrection) {
 				if (handIsRelaxed) {
 					//it's a spread
 					handSpreadCount++;

@@ -105,8 +105,6 @@ public class RawDataHandler{
 		double highest = 0;
 		double second = 0;
 		double third = 0;
-		
-		//curent datapoint
 		double current = 0.0;
 		boolean rising = true;
 		

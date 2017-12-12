@@ -12,10 +12,10 @@ import inputreader.HandData;
 public class ZAxisVariationClassificator extends AbsClassificator {
 	
 	/** Threshold of relation between average and standard deviation until which result will be considered {@link ClassificationResult.LOW} */
-	private static final double lowThreshold = 0.2;
+	private static final double lowThreshold = 0.25;
 	
 	/** Threshold of relation between average and standard deviation until which result will be considered {@link ClassificationResult.MEDIUM} */
-	private static final double mediumThreshold = 0.4;	
+	private static final double mediumThreshold = 0.5;	
 	
 	public ZAxisVariationClassificator(CalibrationDataset calibrationDataset) {
 		super(calibrationDataset);

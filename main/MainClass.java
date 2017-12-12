@@ -1,5 +1,6 @@
 package main;
 
+import java.util.Arrays;
 import java.util.List;
 
 import classification.ClassificationResult;
@@ -23,16 +24,10 @@ import inputreader.RawDataHandler;
 public class MainClass{
 	
 	/** Datareader for csv-Files */
-	CsvDataReader csvDataReader = new CsvDataReader();
+	static CsvDataReader csvDataReader = new CsvDataReader();
 	
 	/** Dataset from the Calibration done by initial calibration-session */
 	private CalibrationDataset calibrationDataSet;
-	
-	/** Data from first Session */
-	private List<HandData> firstSessionData;
-	
-	/** Data from second Session */
-	private List<HandData> secondSessionData;
 	
 	/** Classificators */
 	private ClassifyableIF handSpreadCount;
@@ -41,33 +36,39 @@ public class MainClass{
 	private ClassifyableIF zAxisVariation;
 		
 	/** Dempster-Evaluator */
-	private DempsterEvaluator dempsterEvaluator = new DempsterEvaluator();	;	
+	private DempsterEvaluator dempsterEvaluator = new DempsterEvaluator();	
 	
 	/** Netica-Evaluator */
-	private BayesEvaluator bayesEvaluator = new BayesEvaluator();;
+	private BayesEvaluator bayesEvaluator = new BayesEvaluator();
 	
+	/** List of filenames containing session data */
+	private static List<String> fileNameList = Arrays.asList(new String[] {"/CSV_Data/session_1_Statistics.csv", "/CSV_Data/session_2_Statistics.csv", "/CSV_Data/session_3_Statistics.csv", "/CSV_Data/session_4_Statistics.csv", "/CSV_Data/session_5_Statistics.csv"});
+		
 	public static void main(String args[]) {		
 		
 		MainClass mainClass = new MainClass();
 		mainClass.createCalibrationDataset();
-		mainClass.extractSessionData();	
 		mainClass.initializeClassificators();
 				
-		//evaluate first Session
-		System.out.println("Evaluating first Session:");
-		mainClass.evaluateSession(mainClass.firstSessionData);
-		
-		//evaluate second Session
-		System.out.println("Evaluating second Session:");
-		mainClass.evaluateSession(mainClass.secondSessionData);	
+		//evaluate sessions
+		for (int i = 0; i < fileNameList.size(); i++) {
+			String fileName = fileNameList.get(i);
+			System.out.println("------------------------------------------------------------------");
+			System.out.println("Evaluating session Number " + (i+1) + " from file" + fileName + ":");
+			mainClass.evaluateSession(fileName);
+			System.out.println("End of evaluation number " + (i+1) + " from file" + fileName + ".");
+			System.out.println("------------------------------------------------------------------");
+		}	
 	}
 	
 	/**
 	 * Evaluate a session using the extracted session-Data
 	 * @param sessionData the data of the session to be evaluated 
 	 */
-	private void evaluateSession(List<HandData> sessionData) {
+	private void evaluateSession(String filename) {
 
+		List<HandData> sessionData = csvDataReader.parseIntoDataObject(filename);
+		
 		//set the session data for the classificators
 		this.handSpreadCount.setSessionData(sessionData);
 		this.movementCorrection.setSessionData(sessionData);
@@ -111,12 +112,4 @@ public class MainClass{
 		rawDataHandler.setDataFromCompleteRun(extractedData);
 		this.calibrationDataSet = rawDataHandler.generateCalibrationDataset();
 	}
-	
-	/**
-	 * Extract the SessionData from the csv-Files
-	 */
-	private void extractSessionData() {
-		this.firstSessionData = csvDataReader.parseIntoDataObject("/CSV_Data/session_1_Statistics.csv");
-		this.secondSessionData = csvDataReader.parseIntoDataObject("/CSV_Data/session_2_Statistics.csv");		
-	}	
 }
