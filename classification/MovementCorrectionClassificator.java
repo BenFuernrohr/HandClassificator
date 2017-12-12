@@ -28,6 +28,9 @@ public class MovementCorrectionClassificator extends AbsClassificator{
 	/** Time-frame to accord for a "correction" instead for just a new movement */
 	private static final int correctionWidth = 10;
 	
+	/** Correction of Y-Count */
+	private static final int yCorrection = 3;
+	
 	/** Enum allowing to distinguish between movement in X or Y - Direction  */
 	private enum Direction {X,Y}
 	
@@ -37,7 +40,7 @@ public class MovementCorrectionClassificator extends AbsClassificator{
 
 	@Override
 	public ClassificationResult classify() {
-		int totalMovements = this.countMovementCorrections(Direction.X) + this.countMovementCorrections(Direction.Y);
+		int totalMovements = this.countMovementCorrections(Direction.X) + this.countMovementCorrections(Direction.Y) / yCorrection;
 		
 		if (totalMovements < MovementCorrectionClassificator.lowThreshold) {
 			return ClassificationResult.LOW;

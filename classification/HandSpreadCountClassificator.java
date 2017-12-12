@@ -12,13 +12,13 @@ import inputreader.HandData;
 public class HandSpreadCountClassificator extends AbsClassificator{
 
 	/** Threshold of relation between average and standard deviation until which result will be considered {@link ClassificationResult.LOW} */
-	private static final int lowThreshold = 3;
+	private static final int lowThreshold = 4;
 	
 	/** Threshold of relation between average and standard deviation until which result will be considered {@link ClassificationResult.MEDIUM} */
-	private static final int mediumThreshold = 6;
+	private static final int mediumThreshold = 8;
 	
 	/** Since spreads in the actual game are usually not as high as in the calibration, the calibrated threshold will be reduced by this multiplicator*/
-	private static final double measurementCorrection = 0.9;
+	private static final double measurementCorrection = 0.8;
 	
 	public HandSpreadCountClassificator(CalibrationDataset calibrationDataset) {
 		super(calibrationDataset);
